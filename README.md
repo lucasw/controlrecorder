@@ -3,6 +3,12 @@ controlrecorder
 
 Record joystick and mouse and possibly keyboard inputs in linux for later playback.
 
+Variations on this probably already exist, but want custom record format (yaml based?),
+and ease of interoperation with vimjay.  
+
+Spoofing inputs with uinput is a possibility.
+
+Timestamping and interpolation are interesting issues, first program will will ignore and simply sample at some rate and playback at the rate the samples are loaded.
 
 ---
 ```
