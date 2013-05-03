@@ -71,15 +71,58 @@ int main( int argc, char* argv[] )
   ioctl(fd, JSIOCGBUTTONS, &buttons);
   ioctl(fd, JSIOCGNAME(NAME_LENGTH), name);
 
+
+  LOG(INFO) << "Joystick (" << name << ") has " 
+      << axes << " axes and " << buttons << " buttons. Driver version is "
+      << (version >> 16) << "."  << ((version >> 8) & 0xff) << "."
+      << (version & 0xff);
+
   struct js_event js;
 
   fcntl(fd, F_SETFL, O_NONBLOCK);
 
+  cv::Mat im = cv::Mat(600, 800, CV_8UC3, cv::Scalar::all(0));
+
+  std::vector<int> axis;
+  std::vector<int> button;
+  
+  axis.resize(axes);
+  button.resize(buttons);
+
   while (1) {
 
-    while (read(fd, &js, sizeof(struct js_event)) == sizeof(struct js_event))  {
-      printf("Event: type %d, time %d, number %d, value %d\n",
-          js.type, js.time, js.number, js.value);
+    int i = 0;
+    while ((read(fd, &js, sizeof(struct js_event)) == sizeof(struct js_event)) && (i< 50))  {
+      //LOG(INFO) << "Event: type " << js.type << ", time " << js.time
+      //    << ", number " << js.number << ", value " << js.value;
+      
+      i++;
+      switch(js.type & ~JS_EVENT_INIT) {
+          case JS_EVENT_BUTTON:
+          button[js.number] = js.value;
+          break;
+          case JS_EVENT_AXIS:
+          axis[js.number] = js.value;
+          break;
+      }
+ 
+          cv::Point2f pt = cv::Point2f( 
+              im.cols*((float)axis[0] + 32768.0)/(65536.0),
+              im.rows*((float)axis[1] + 32768.0)/(65536.0));
+
+          //LOG(INFO) << pt.x << " " << pt.y;
+
+          cv::Scalar col = cv::Scalar(
+              (axis[2] + 32768)/256,
+              (axis[3] + 32768)/256,
+              230
+              );
+
+          cv::circle(im,
+              pt,
+              3,
+              col
+              );   
     }
 
     if (errno != EAGAIN) {
@@ -87,7 +130,10 @@ int main( int argc, char* argv[] )
       exit (1);
     }
 
-    usleep(10000);
+
+    cv::imshow("im", im);
+    char d = cv::waitKey(100);
+    if (d == 'q') exit(0);
   }
 
 }
