@@ -23,3 +23,5 @@ $ dmesg
 [   35.853258] input: Logitech Logitech Dual Action as /devices/pci0000:00/0000:00:1d.0/usb2/2-1/2-1.4/2-1.4:1.0/input/input13
 [   35.853401] hid-generic 0003:046D:C216.0001: input,hidraw0: USB HID v1.10 Joystick [Logitech Logitech Dual Action] on usb-0000:00:1d.0-1.4/input0
 ```
+
+Can ``` jstest /dev/input/js0  > temp.txt ```, the edit temp.txt in vim and do a ```%s/\r/\r/g```, then write a script to parse that file.  There aren't any timestampes but perhaps each line is a roughly regular interval.
